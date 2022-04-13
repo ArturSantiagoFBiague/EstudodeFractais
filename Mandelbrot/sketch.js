@@ -22,94 +22,53 @@ function rnd_int(min, max) {
 }
 console.log(fxrand())
 
-
-let no0fStars, sizeDiff, majorAxisMinLen = 500, widthHeightRatio = 0.3, rotationGradient, rotationGradientSlider, stars =[], part, tam, dist, dist2, r, g, b, dist3, seed;
-
-
-
 function setup() {
-  no0fStars = rnd_btw(200, 3200);
-  sizeDiff = rnd_btw(.1, 1);
-
-  dist = rnd_btw(800, 2900);
-  dist2 = rnd_btw(.00001, .0000009);
-  dist3 = rnd_btw(.09, .1);
-  r = rnd_btw(100,255);
-  g = rnd_btw(10, 100);
-  b = rnd_btw(50,235);
-  opac = rnd_btw(2.5, 4);
-  //r2 = int(random(255));
-  //g2 = int(random(255));
-  //b2 = int(random(255));
-
-
-
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  rotationGradient = PI/no0fStars;
-  rotationGradientSlider = createSlider(0,rotationGradient*5, rotationGradient, .002);
-
-
-
-
-
-  for(let i=0;i<no0fStars;i++) {
-    const majorAxisLen = majorAxisMinLen + i*sizeDiff;
-    stars.push( new Star(majorAxisLen) )
- }
-
+  createCanvas(400, 400);
+  pixelDensity(1);
+  
 }
 
 function draw() {
-  background('black');
+  var maxiterations = 100;
 
+  loadPixels();
+  
+  for(var x = 0; x < width; x++){
+    for(var y = 0; y < height; y++){
+      var a = map(x, 0, width, -2, 2);
+      var b = map(y, 0, height, -2, 2);  
 
-
-  noFill();
-  stroke('red');
-
-  translate(width/20, height/20)
-
-  for(let i=0;i<no0fStars;i++) {
-    // const majorAxisLen = majorAxisMinLen + i*sizeDiff;
-    // const minorAxisLen = majorAxisLen * widthHeightRatio;
-
-    rotate(PI/dist)
-
-    stars[i].display();
-    stars[i].update();
-
-    rotateX(frameCount * dist2)
-
-
-    // ellipse(0, 0, majorAxisLen, minorAxisLen);
+      var ca = a;
+      var cb = b; 
+      
+      
+      var n = 0; 
+      var z = 0;
+      
+      while(n < maxiterations){
+        var aa = a*a - b*b;
+        var bb = 2 * a * b;
+        a = aa + ca;
+        b = bb + cb;
+        
+        if(abs(a + b) > 16){
+          break;  
+        }
+        n++;
+      }
+      
+      var bright = map(n, 0, 100, 0, 255); 
+      if(n === maxiterations){
+        bright = 0;
+      }
+      
+      var pix = (x + y * width) * 4;
+      pixels[pix + 0] = bright;
+      pixels[pix + 1] = bright;
+      pixels[pix + 2] = bright;
+      pixels[pix + 3] = 51;
+    }
   }
-
-}
-
-class Star{
- constructor(majorAxisLen) {
-   this.majorAxisLen = majorAxisLen;
-   this.minorAxisLen = majorAxisLen * widthHeightRatio;
-   this.theta = random(2*PI)
-   this.deltaTheta = 0.01;
- }
-
-  display() {
-
-  const x = (this.majorAxisLen/2)*cos(this.theta);
-  const y = (this.minorAxisLen/2)*sin(this.theta);
-
-    noStroke();
-    fill(r, g, b, 10000);
-
-    rotateX(radians(dist3))
-    rotateY(radians(-0.000091))
-    rotateZ(radians(0.00000005))
-
-    circle(x,y,opac, 10,10)
-  }
-
-  update() {
-    this.theta = this.theta + this.deltaTheta;
-  }
+  updatePixels();
+  
 }
